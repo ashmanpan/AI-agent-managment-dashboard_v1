@@ -47,7 +47,7 @@ const Auth = {
         const demoUsers = {
             'kpanse@cisco.com': {
                 id: 'u1',
-                name: 'Kiran Panse',
+                name: 'Krishnaji Panse',
                 email: 'kpanse@cisco.com',
                 role: 'root-admin'
             },
