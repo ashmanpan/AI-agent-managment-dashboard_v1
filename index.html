@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Management Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>Agent Management Portal</h1>
+            <p class="subtitle">Cisco Network Automation Team</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="your.email@cisco.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+            <p class="login-footer">Powered by AWS Cognito</p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-container" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>Agent Management Portal</h1>
+            </div>
+            <div class="header-right">
+                <span id="user-info" class="user-info"></span>
+                <span id="user-role" class="user-role"></span>
+                <button id="logout-btn" class="btn btn-outline">Logout</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-view="dashboard">Dashboard</button>
+            <button class="nav-tab" data-view="usecases">Use Cases</button>
+            <button class="nav-tab" data-view="persons">Team Members</button>
+            <button class="nav-tab" data-view="agents">Agents</button>
+            <button class="nav-tab" data-view="testcases">Test Cases</button>
+            <button class="nav-tab" data-view="admin" id="admin-tab">Admin</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <div class="view-header">
+                    <h2>Dashboard</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Use Cases</h3>
+                        <span id="stat-usecases" class="stat-number">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Agents</h3>
+                        <span id="stat-agents" class="stat-number">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Team Members</h3>
+                        <span id="stat-members" class="stat-number">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Test Cases</h3>
+                        <span id="stat-testcases" class="stat-number">0</span>
+                    </div>
+                    <div class="stat-card stat-card-danger" id="overdue-stat-card">
+                        <h3>Overdue Agents</h3>
+                        <span id="stat-overdue" class="stat-number stat-danger">0</span>
+                    </div>
+                    <div class="stat-card stat-card-warning" id="upcoming-stat-card">
+                        <h3>Due This Week</h3>
+                        <span id="stat-upcoming" class="stat-number stat-warning">0</span>
+                    </div>
+                </div>
+
+                <!-- Overdue Agents Alert -->
+                <div id="overdue-section" class="alert-section hidden">
+                    <div class="alert alert-danger">
+                        <h3>Overdue Agents - Action Required</h3>
+                        <p>The following agents have missed their target dates:</p>
+                        <div id="overdue-agents-list" class="overdue-list"></div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div id="upcoming-section" class="alert-section hidden">
+                    <div class="alert alert-warning">
+                        <h3>Upcoming Deadlines (Next 7 Days)</h3>
+                        <div id="upcoming-agents-list" class="upcoming-list"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>Status Overview</h3>
+                        <div id="status-overview" class="status-list"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Recent Activity</h3>
+                        <div id="recent-activity" class="activity-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Use Cases View -->
+            <div id="usecases-view" class="view">
+                <div class="view-header">
+                    <h2>Use Cases</h2>
+                    <button class="btn btn-primary" id="add-usecase-btn">+ Add Use Case</button>
+                </div>
+                <div class="filters">
+                    <select id="uc-status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="dev">Development</option>
+                        <option value="test">Testing</option>
+                        <option value="final-test">Final Test</option>
+                        <option value="customer-lab">Customer Lab</option>
+                        <option value="final-tested">Final Tested</option>
+                        <option value="ready-prod">Ready for Production</option>
+                    </select>
+                </div>
+                <div id="usecases-grid" class="cards-grid"></div>
+            </div>
+
+            <!-- Persons View -->
+            <div id="persons-view" class="view">
+                <div class="view-header">
+                    <h2>Team Members</h2>
+                    <button class="btn btn-primary" id="add-person-btn">+ Add Member</button>
+                </div>
+                <div class="filters">
+                    <select id="person-role-filter">
+                        <option value="">All Roles</option>
+                        <option value="pm">Project Manager</option>
+                        <option value="sa">Solution Architect</option>
+                        <option value="psa">Principal SA</option>
+                        <option value="tech-lead">Tech Lead</option>
+                        <option value="dev-test">Dev-Test Engineer</option>
+                        <option value="ai-engineer">AI Engineer</option>
+                        <option value="testing">Testing Engineer</option>
+                    </select>
+                </div>
+                <div id="persons-grid" class="cards-grid"></div>
+            </div>
+
+            <!-- Agents View -->
+            <div id="agents-view" class="view">
+                <div class="view-header">
+                    <h2>Agents</h2>
+                    <button class="btn btn-primary" id="add-agent-btn">+ Add Agent</button>
+                </div>
+                <div class="filters">
+                    <select id="agent-status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="dev">Development</option>
+                        <option value="test">Testing</option>
+                        <option value="final-test">Final Test</option>
+                        <option value="customer-lab">Customer Lab</option>
+                        <option value="final-tested">Final Tested</option>
+                        <option value="ready-prod">Ready for Production</option>
+                    </select>
+                </div>
+                <div id="agents-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Agent Name</th>
+                                <th>Use Case</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Deadline</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agents-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Test Cases View -->
+            <div id="testcases-view" class="view">
+                <div class="view-header">
+                    <h2>Test Cases</h2>
+                    <button class="btn btn-primary" id="add-testcase-btn">+ Add Test Case</button>
+                </div>
+                <div class="filters">
+                    <select id="tc-usecase-filter">
+                        <option value="">All Use Cases</option>
+                    </select>
+                    <select id="tc-status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div id="testcases-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Test ID</th>
+                                <th>Title</th>
+                                <th>Use Case</th>
+                                <th>Agent</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testcases-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin View -->
+            <div id="admin-view" class="view">
+                <div class="view-header">
+                    <h2>Administration</h2>
+                </div>
+                <div class="admin-sections">
+                    <div class="admin-card">
+                        <h3>User Management</h3>
+                        <p>Manage user roles and permissions</p>
+                        <div id="users-list" class="users-list"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Data Management</h3>
+                        <p>Import/Export data</p>
+                        <button class="btn btn-secondary" id="export-data-btn">Export Data</button>
+                        <button class="btn btn-secondary" id="import-data-btn">Import Data</button>
+                        <input type="file" id="import-file" class="hidden" accept=".json">
+                    </div>
+                    <div class="admin-card">
+                        <h3>System Settings</h3>
+                        <p>Configure system parameters</p>
+                        <button class="btn btn-secondary" id="sync-data-btn">Sync with DynamoDB</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Chatbot -->
+        <div id="chatbot-container" class="chatbot-container">
+            <div id="chatbot-toggle" class="chatbot-toggle">
+                <span class="chatbot-icon">💬</span>
+                <span class="chatbot-label">AI Assistant</span>
+            </div>
+            <div id="chatbot-window" class="chatbot-window hidden">
+                <div class="chatbot-header">
+                    <h3>AI Assistant</h3>
+                    <span class="powered-by">Powered by Claude 4.5</span>
+                    <button id="chatbot-close" class="chatbot-close">&times;</button>
+                </div>
+                <div id="chatbot-messages" class="chatbot-messages">
+                    <div class="message bot-message">
+                        <p>Hello! I'm your AI assistant. I can help you with:</p>
+                        <ul>
+                            <li>Finding information about use cases</li>
+                            <li>Checking agent statuses</li>
+                            <li>Team member assignments</li>
+                            <li>Test case information</li>
+                        </ul>
+                        <p>What would you like to know?</p>
+                    </div>
+                </div>
+                <div class="chatbot-input-container">
+                    <input type="text" id="chatbot-input" placeholder="Ask me anything..." />
+                    <button id="chatbot-send" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Use Case Modal -->
+    <div id="usecase-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="usecase-modal-title">Add Use Case</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="usecase-form">
+                <input type="hidden" id="uc-id">
+                <div class="form-group">
+                    <label for="uc-code">Use Case Code</label>
+                    <input type="text" id="uc-code" placeholder="e.g., UC1" required>
+                </div>
+                <div class="form-group">
+                    <label for="uc-name">Use Case Name</label>
+                    <input type="text" id="uc-name" placeholder="e.g., Incident Management" required>
+                </div>
+                <div class="form-group">
+                    <label for="uc-description">Description</label>
+                    <textarea id="uc-description" rows="3" placeholder="Describe the use case..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="uc-status">Status</label>
+                    <select id="uc-status">
+                        <option value="dev">Development</option>
+                        <option value="test">Testing</option>
+                        <option value="final-test">Final Test</option>
+                        <option value="customer-lab">Customer Lab</option>
+                        <option value="final-tested">Final Tested</option>
+                        <option value="ready-prod">Ready for Production</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="uc-owner">Owner</label>
+                    <select id="uc-owner"></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Person Modal -->
+    <div id="person-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="person-modal-title">Add Team Member</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="person-form">
+                <input type="hidden" id="person-id">
+                <div class="form-group">
+                    <label for="person-name">Name</label>
+                    <input type="text" id="person-name" placeholder="Full Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="person-email">Email</label>
+                    <input type="email" id="person-email" placeholder="email@cisco.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="person-role">Role</label>
+                    <select id="person-role">
+                        <option value="pm">Project Manager</option>
+                        <option value="sa">Solution Architect</option>
+                        <option value="psa">Principal SA</option>
+                        <option value="tech-lead">Tech Lead</option>
+                        <option value="dev-test">Dev-Test Engineer</option>
+                        <option value="ai-engineer">AI Engineer</option>
+                        <option value="testing">Testing Engineer</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Agent Modal -->
+    <div id="agent-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="agent-modal-title">Add Agent</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="agent-form">
+                <input type="hidden" id="agent-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agent-name">Agent Name</label>
+                        <input type="text" id="agent-name" placeholder="e.g., IO Agent" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="agent-usecase">Use Case</label>
+                        <select id="agent-usecase" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agent-assigned">Assigned To</label>
+                        <select id="agent-assigned" multiple></select>
+                        <small>Hold Ctrl/Cmd to select multiple</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="agent-status">Current Status</label>
+                        <select id="agent-status">
+                            <option value="dev">Development</option>
+                            <option value="test">Testing</option>
+                            <option value="final-test">Final Test</option>
+                            <option value="customer-lab">Customer Lab</option>
+                            <option value="final-tested">Final Tested</option>
+                            <option value="ready-prod">Ready for Production</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status Timeline with Dates -->
+                <div class="form-section">
+                    <h4>Status Timeline & Target Dates</h4>
+                    <p class="form-hint">Set target completion dates for each status phase</p>
+                    <div class="status-dates-grid">
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge dev">Dev</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-dev">
+                        </div>
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge test">Test</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-test">
+                        </div>
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge final-test">Final Test</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-final-test">
+                        </div>
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge customer-lab">Customer Lab</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-customer-lab">
+                        </div>
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge final-tested">Final Tested</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-final-tested">
+                        </div>
+                        <div class="status-date-item">
+                            <label>
+                                <span class="status-badge ready-prod">Ready for Prod</span>
+                                Target Date
+                            </label>
+                            <input type="date" id="agent-date-ready-prod">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="agent-description">Description</label>
+                    <textarea id="agent-description" rows="2" placeholder="Describe the agent..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Test Case Modal -->
+    <div id="testcase-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="testcase-modal-title">Add Test Case</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="testcase-form">
+                <input type="hidden" id="tc-id">
+                <div class="form-group">
+                    <label for="tc-title">Test Case Title</label>
+                    <input type="text" id="tc-title" placeholder="Brief description of test" required>
+                </div>
+                <div class="form-group">
+                    <label for="tc-usecase">Use Case</label>
+                    <select id="tc-usecase" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="tc-agent">Agent</label>
+                    <select id="tc-agent"></select>
+                </div>
+                <div class="form-group">
+                    <label for="tc-assigned">Assigned To</label>
+                    <select id="tc-assigned"></select>
+                </div>
+                <div class="form-group">
+                    <label for="tc-status">Status</label>
+                    <select id="tc-status">
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tc-steps">Test Steps</label>
+                    <textarea id="tc-steps" rows="4" placeholder="1. Step one&#10;2. Step two&#10;3. Step three"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tc-expected">Expected Result</label>
+                    <textarea id="tc-expected" rows="2" placeholder="What should happen..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div id="details-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="details-modal-title">Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="details-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

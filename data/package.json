@@ -1,0 +1,16 @@
+{
+  "name": "agent-portal-seed",
+  "version": "1.0.0",
+  "description": "Seed script for Agent Portal DynamoDB tables",
+  "main": "seed.js",
+  "scripts": {
+    "seed": "node seed.js",
+    "seed:dev": "ENVIRONMENT=dev node seed.js",
+    "seed:staging": "ENVIRONMENT=staging node seed.js",
+    "seed:prod": "ENVIRONMENT=prod node seed.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/lib-dynamodb": "^3.400.0"
+  }
+}

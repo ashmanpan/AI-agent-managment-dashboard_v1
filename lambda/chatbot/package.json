@@ -1,0 +1,14 @@
+{
+  "name": "agent-portal-chatbot",
+  "version": "1.0.0",
+  "description": "Agent Portal Chatbot Lambda Function - Claude 4.5",
+  "main": "chatbot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/lib-dynamodb": "^3.400.0",
+    "@anthropic-ai/sdk": "^0.17.0"
+  }
+}
