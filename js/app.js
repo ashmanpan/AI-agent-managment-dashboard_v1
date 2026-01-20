@@ -22,11 +22,45 @@ const App = {
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-container').classList.add('hidden');
 
+        // Setup auth tab switching
+        this.setupAuthTabs();
+
         // Setup login form handler
         const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             await this.handleLogin();
+        });
+
+        // Setup signup form handler
+        const signupForm = document.getElementById('signup-form');
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleSignup();
+        });
+    },
+
+    // Setup auth tabs
+    setupAuthTabs() {
+        const tabs = document.querySelectorAll('.auth-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Show/hide forms
+                if (tab.dataset.tab === 'login') {
+                    loginForm.classList.remove('hidden');
+                    signupForm.classList.add('hidden');
+                } else {
+                    loginForm.classList.add('hidden');
+                    signupForm.classList.remove('hidden');
+                }
+            });
         });
     },
 
@@ -47,6 +81,29 @@ const App = {
             this.showApp();
         } else {
             alert(result.error || 'Login failed. Please try again.');
+        }
+    },
+
+    // Handle signup
+    async handleSignup() {
+        const name = document.getElementById('signup-name').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const role = document.getElementById('signup-role').value;
+
+        // Validate Cisco email domain
+        if (!email.endsWith('@cisco.com')) {
+            alert('Only @cisco.com email addresses are allowed.');
+            return;
+        }
+
+        const result = await Auth.signup(name, email, password, role);
+
+        if (result.success) {
+            alert('Account created successfully! Welcome, ' + result.user.name);
+            this.showApp();
+        } else {
+            alert(result.error || 'Signup failed. Please try again.');
         }
     },
 

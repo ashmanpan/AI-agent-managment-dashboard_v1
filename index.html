@@ -8,12 +8,20 @@
     <link rel="stylesheet" href="css/chatbot.css">
 </head>
 <body>
-    <!-- Login Screen -->
+    <!-- Login/Signup Screen -->
     <div id="login-screen" class="login-container">
         <div class="login-box">
             <h1>Agent Management Portal</h1>
             <p class="subtitle">Cisco Network Automation Team</p>
-            <form id="login-form">
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Sign In</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" placeholder="your.email@cisco.com" required>
@@ -23,7 +31,39 @@
                     <input type="password" id="password" placeholder="Enter password" required>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <p class="form-hint">Pre-registered users can use password: <code>demo123</code></p>
             </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Cisco Email</label>
+                    <input type="email" id="signup-email" placeholder="your.email@cisco.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Min 6 characters" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-role">Role</label>
+                    <select id="signup-role" required>
+                        <option value="dev-test">Dev-Test Engineer</option>
+                        <option value="ai-engineer">AI Engineer</option>
+                        <option value="testing">Testing Engineer</option>
+                        <option value="tech-lead">Tech Lead</option>
+                        <option value="sa">Solutions Architect (SA)</option>
+                        <option value="psa">Principal SA (PSA)</option>
+                        <option value="pm">Project Manager (PM)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                <p class="form-hint">Only @cisco.com emails are allowed</p>
+            </form>
+
             <p class="login-footer">Powered by AWS Cognito</p>
         </div>
     </div>

@@ -16,7 +16,7 @@ const Auth = {
     // Login with Cognito (Demo mode uses local validation)
     async login(email, password) {
         if (CONFIG.demoMode) {
-            return this.demoLogin(email, password);
+            return this.demoLoginEnhanced(email, password);
         }
 
         // Real Cognito authentication would go here
@@ -241,6 +241,86 @@ const Auth = {
     // Get auth token
     getToken() {
         return localStorage.getItem('authToken');
+    },
+
+    // Signup - Register new user (Demo mode)
+    async signup(name, email, password, role = 'dev-test') {
+        // Validate cisco.com email
+        if (!email.toLowerCase().endsWith('@cisco.com')) {
+            return { success: false, error: 'Only @cisco.com email addresses are allowed.' };
+        }
+
+        // Validate password
+        if (password.length < 6) {
+            return { success: false, error: 'Password must be at least 6 characters.' };
+        }
+
+        // Check if user already exists
+        const registeredUsers = this.getRegisteredUsers();
+        if (registeredUsers[email.toLowerCase()]) {
+            return { success: false, error: 'User already exists. Please login instead.' };
+        }
+
+        // Create new user
+        const newUser = {
+            id: 'u' + Date.now(),
+            name: name.trim(),
+            email: email.toLowerCase(),
+            role: role,
+            password: password, // In real app, this would be hashed
+            createdAt: new Date().toISOString()
+        };
+
+        // Save to registered users
+        registeredUsers[email.toLowerCase()] = newUser;
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+        // Also add to persons in DataStore for assignment purposes
+        if (typeof DataStore !== 'undefined') {
+            const persons = DataStore.getAll('persons');
+            const existingPerson = persons.find(p => p.email.toLowerCase() === email.toLowerCase());
+            if (!existingPerson) {
+                DataStore.create('persons', {
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role
+                });
+            }
+        }
+
+        // Auto-login after signup
+        this.currentUser = { ...newUser };
+        delete this.currentUser.password;
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+
+        return { success: true, user: this.currentUser };
+    },
+
+    // Get registered users from localStorage
+    getRegisteredUsers() {
+        const users = localStorage.getItem('registeredUsers');
+        return users ? JSON.parse(users) : {};
+    },
+
+    // Enhanced demo login that checks registered users first
+    demoLoginEnhanced(email, password) {
+        const emailLower = email.toLowerCase();
+
+        // Check registered users first
+        const registeredUsers = this.getRegisteredUsers();
+        if (registeredUsers[emailLower]) {
+            if (registeredUsers[emailLower].password === password) {
+                const user = { ...registeredUsers[emailLower] };
+                delete user.password;
+                this.currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                return { success: true, user: this.currentUser };
+            }
+            return { success: false, error: 'Invalid password.' };
+        }
+
+        // Fall back to built-in demo users
+        return this.demoLogin(email, password);
     }
 };
 
